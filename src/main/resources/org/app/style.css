@@ -1,0 +1,15 @@
+.root {
+    -fx-background-color: #f0f0f0;
+}
+
+.button {
+    -fx-font-size: 14px;
+    -fx-background-radius: 5;
+    -fx-padding: 8 15 8 15;
+}
+
+.text-area {
+    -fx-font-family: "Consolas", "Monospaced";
+    -fx-font-size: 12px;
+    -fx-background-color: #ffffff;
+}
