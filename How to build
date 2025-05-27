@@ -5,4 +5,10 @@ pip install pdfplumber pyinstaller
 pyinstaller --onefile python/extract.py --name extract.exe
 
 
+
+for mac i had to run
+/Users/tamastyukodi/Library/Python/3.9/bin/pyinstaller --onefile extract.py --name extract
+
+
+
 it will create the exe in the DIST folder. Now copy it to resources/native/windows
