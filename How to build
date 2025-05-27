@@ -1,0 +1,8 @@
+To create the python extractor for WINDOWS, run:
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install pdfplumber pyinstaller
+pyinstaller --onefile python/extract.py --name extract.exe
+
+
+it will create the exe in the DIST folder. Now copy it to resources/native/windows
