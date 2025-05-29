@@ -30,49 +30,35 @@ def extract_fields(text):
                 data["mrn"] = parts[1].strip()
             break
 
-    # 3. nrDeReferinta
-    m = re.search(r'LRN\s*[:\s]*([A-Za-z0-9-]+)', text, re.IGNORECASE)
-    if m:
-        data["nrDeReferinta"] = m.group(1)
-
-    # 4. valoareStatistica
+    # 3. referintaDocument
     for l in lines:
-        if "valoarea statistica" in l.lower():
-            m = re.search(r"([\d\.,]+)", l)
-            if m:
-                data["valoareStatistica"] = m.group(1)
-            break
-
-    # 5. depozitPlataAnticipata
-    for l in lines:
-        if "depozit plata anticipa" in l.lower():
-            m = re.search(r"([\d\.,]+)", l)
-            if m:
-                data["depozitPlataAnticipata"] = m.group(1)
-            break
-
-    # 6. referintaDocument
-    for l in lines:
-        if l.startswith("Z822"):
-            m = re.search(r'Z822\s+(.+?\s*/\s*\d{2}\.\d{2}\.\d{4})', l)
+        if l.startswith("Z821"):
+            m = re.search(r'Z821\s+(.+?\s*/\s*\d{2}\.\d{2}\.\d{4})', l)
             if m:
                 data["referintaDocument"] = m.group(1).strip()
             break
 
-    # 7. totalPlataA00
-    total_idx = None
-    for idx, l in enumerate(lines):
-        if l.lower().startswith("total plata"):
-            total_idx = idx
-            break
-    if total_idx is not None:
-        for l in lines[total_idx + 1:]:
-            if l.startswith("A00"):
-                m = re.search(r"A00\W*([\d\.,]+)", l)
-                if m:
-                    data["totalPlataA00"] = m.group(1)
+    # 4. nrArticole: section header “5 Articole” → next line only
+        for i, l in enumerate(lines):
+            if "5 Articole" in l:
+                # look forward until we hit a line starting with digits
+                for j in range(i+1, len(lines)):
+                    m = re.match(r"^(\d+)\b", lines[j])
+                    if m:
+                        data["nrArticole"] = m.group(1)
+                        break
                 break
 
+
+    # 5. nrContainer: first look for “Containere” → next line
+    for i, l in enumerate(lines):
+        if "Numar container" in l:
+            if i + 1 < len(lines):
+                nxt = lines[i + 1]
+                m = re.match(r"([A-Z0-9\-]+)", nxt)
+                if m:
+                    data["nrContainer"] = m.group(1)
+            break
     return data
 
 def main(folder_path):

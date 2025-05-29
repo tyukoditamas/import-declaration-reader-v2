@@ -6,7 +6,9 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.ToggleGroup;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.app.model.ImportDeclaration;
@@ -14,17 +16,34 @@ import org.app.service.PdfFolderService;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Objects;
 
 public class MainController {
-    @FXML private Button browseButton;
-    @FXML private TextArea logArea;
-    @FXML private ProgressIndicator spinner;
+    @FXML
+    private Button browseButton;
+    @FXML
+    private TextArea logArea;
+    @FXML
+    private ProgressIndicator spinner;
+    @FXML
+    private RadioButton cuFizicRadio;
+    @FXML
+    private RadioButton faraFizicRadio;
+    private final ToggleGroup fizicToggle = new ToggleGroup();
 
 
-    @FXML private void onBrowse() {
+    @FXML
+    public void initialize() {
+        cuFizicRadio.setToggleGroup(fizicToggle);
+        faraFizicRadio.setToggleGroup(fizicToggle);
+        cuFizicRadio.setSelected(true); // Optionally set a default
+    }
+
+    @FXML
+    private void onBrowse() {
         File folder = new DirectoryChooser()
                 .showDialog((Stage) browseButton.getScene().getWindow());
         if (folder == null) {
@@ -60,7 +79,14 @@ public class MainController {
         // 3) When it succeeds, write out the CSV on the FX thread
         task.setOnSucceeded(e -> {
             try {
-                writeCsv(new File(folder, "output.csv"), task.getValue());
+                // Use the selected radio button to decide which method to call
+                if (cuFizicRadio.isSelected()) {
+                    writeCsvCuFizic(new File(folder, "output.csv"), task.getValue());
+                } else if (faraFizicRadio.isSelected()) {
+                    writeCsvFaraFizic(new File(folder, "output.csv"), task.getValue());
+                } else {
+                    log("Please select CU FIZIC or FARA FIZIC before proceeding.");
+                }
             } catch (Exception ex) {
                 log("Error writing CSV: " + ex.getMessage());
             }
@@ -73,18 +99,14 @@ public class MainController {
         new Thread(task, "pdf-extractor").start();
     }
 
-    private void writeCsv(File outFile, List<ImportDeclaration> list) throws Exception {
-        // for rounding the 2.5% commission to 2 decimals
-        DecimalFormat df = new DecimalFormat("#.##");
-
+    private void writeCsvCuFizic(File outFile, List<ImportDeclaration> list) throws IOException {
         try (CSVWriter writer = new CSVWriter(new FileWriter(outFile))) {
             // 1) Header
             writer.writeNext(new String[]{
                     "nr.crt",
                     "CIF/CNP",
-                    "client",
                     "deviz",
-                    "produs",
+                    "Produs",
                     "Serie produs",
                     "Cant",
                     "UM",
@@ -98,31 +120,122 @@ public class MainController {
             int counter = 1;
             for (ImportDeclaration dto : list) {
                 String cif = dto.getNrDestinatar();
-                double valoare = 0;
-                try {
-                    valoare = Double.parseDouble(dto.getValoareStatistica().replace(",", ""));
-                } catch (Exception ignore) {}
 
                 // --- 1) primary row ---
                 String[] primary = {
+                        String.valueOf(counter),                    // nr.crt
+                        cif,                                        // CIF/CNP
+                        "eur",                                      // deviz
+                        "PRIMARY CUSTOMS DECLARATION",              // produs
+                        "nu e cazul",                               // Serie produs
+                        "1",                                        // Cant
+                        "BUC",                                      // UM
+                        "50",                                       // Pret FTVA logic
+                        "0",                                       // cota TVA
+                        "MRN " + dto.getMrn()
+                                + " - CONTAINER" + dto.getNrContainer(),    // nota produs
+                        "",                                         // scutit TVA
+                        ""                                          // motiv scutire TVA
+                };
+                writer.writeNext(primary);
+
+                // --- 2) supplemental row ---
+                String[] transit = {
                         String.valueOf(counter),      // nr.crt
-                        cif,                            // CIF/CNP
-                        "",
-                        "RON",                          // deviz
-                        "PREST VAMALE",                 // produs
-                        "",                             // Serie produs
+                        "",                             // CIF/CNP
+                        "eur",                             // deviz
+                        "TRANSIT",                      // produs
+                        "nu e cazul",                             // Serie produs
                         "1",                            // Cant
                         "BUC",                          // UM
-                        // Pret FTVA logic
-                        "RO25153581".equals(cif)
-                                ? (valoare <= 50_000 ? "250"
-                                : valoare <= 200_000 ? "315"
-                                : "915")
-                                : "25",
-                        "19",                           // cota TVA
-                        "MRN " + dto.getMrn(),          // nota produs
+                        "75",                           // Pret FTVA
+                        "0",                           // cota TVA
+                        dto.getReferintaDocument(),     // nota produs
                         "",                             // scutit TVA
                         ""                              // motiv scutire TVA
+                };
+                writer.writeNext(transit);
+
+                if (Integer.parseInt(dto.getNrArticole()) > 1) {
+                    String[] additionalHsCode = {
+                            String.valueOf(counter),  // nr.crt
+                            "",                         // CIF/CNP
+                            "eur",                         // deviz
+                            "ADDITIONAL HS CODE",       // produs
+                            "nu e cazul",                         // Serie produs
+                            String.valueOf(Integer.parseInt(dto.getNrArticole()) - 1),                        // Cant
+                            "BUC",                      // UM
+                            "5",                 // Pret FTVA = 2.5% × A00
+                            "0",                       // cota TVA
+                            "MRN " + dto.getMrn()
+                                    + " - CONTAINER" + dto.getNrContainer(),    // nota produs
+                            "",                         // scutit TVA
+                            ""                          // motiv scutire TVA
+                    };
+                    writer.writeNext(additionalHsCode);
+                }
+
+                // --- 3) physical control
+                String[] physicalControl = {
+                        String.valueOf(counter),      // nr.crt
+                        "",                             // CIF/CNP
+                        "eur",                             // deviz
+                        "PHYSICAL CONTROL",                      // produs
+                        "nu e cazul",                             // Serie produs
+                        "0",                            // Cant
+                        "BUC",                          // UM
+                        "22",                           // Pret FTVA
+                        "0",                           // cota TVA
+                        "CT - " + dto.getReferintaDocument(),     // nota produs
+                        "",                             // scutit TVA
+                        ""                              // motiv scutire TVA
+                };
+                writer.writeNext(physicalControl);
+
+                counter++;
+            }
+        }
+
+        log("CSV written to: " + outFile.getAbsolutePath());
+    }
+
+    private void writeCsvFaraFizic(File outFile, List<ImportDeclaration> list) throws Exception {
+        try (CSVWriter writer = new CSVWriter(new FileWriter(outFile))) {
+            // 1) Header
+            writer.writeNext(new String[]{
+                    "nr.crt",
+                    "CIF/CNP",
+                    "deviz",
+                    "Produs",
+                    "Serie produs",
+                    "Cant",
+                    "UM",
+                    "Pret FTVA",
+                    "cota TVA",
+                    "nota produs",
+                    "scutit TVA (0/1)",
+                    "motiv scutire TVA"
+            });
+
+            int counter = 1;
+            for (ImportDeclaration dto : list) {
+                String cif = dto.getNrDestinatar();
+
+                // --- 1) primary row ---
+                String[] primary = {
+                        String.valueOf(counter),                    // nr.crt
+                        cif,                                        // CIF/CNP
+                        "eur",                                      // deviz
+                        "PRIMARY CUSTOMS DECLARATION",              // produs
+                        "nu e cazul",                               // Serie produs
+                        "1",                                        // Cant
+                        "BUC",                                      // UM
+                        "50",                                       // Pret FTVA logic
+                        "0",                                       // cota TVA
+                        "MRN " + dto.getMrn()
+                                + " - CONTAINER" + dto.getNrContainer(),    // nota produs
+                        "",                                         // scutit TVA
+                        ""                                          // motiv scutire TVA
                 };
                 writer.writeNext(primary);
 
@@ -131,66 +244,37 @@ public class MainController {
                         String.valueOf(counter),      // nr.crt
                         "",                             // CIF/CNP
                         "",
-                        "",                             // deviz
-                        "INTOCMIRE TRANZIT UPS",        // produs
-                        "",                             // Serie produs
+                        "eur",                             // deviz
+                        "TRANSIT",                      // produs
+                        "nu e cazul",                             // Serie produs
                         "1",                            // Cant
                         "BUC",                          // UM
-                        "25",                           // Pret FTVA
-                        "19",                           // cota TVA
-                        "TM- " + dto.getReferintaDocument(),     // nota produs
+                        "75",                           // Pret FTVA
+                        "0",                           // cota TVA
+                        dto.getReferintaDocument(),     // nota produs
                         "",                             // scutit TVA
                         ""                              // motiv scutire TVA
                 };
                 writer.writeNext(transit);
 
-                // --- only if there was an advance deposit: two more rows ---
-                String depozit = dto.getDepozitPlataAnticipata();
-                if (depozit != null && !depozit.isBlank()) {
-                    // 3) commission row
-                    double totalA00 = 0;
-                    try {
-                        totalA00 = Double.parseDouble(
-                                Objects.toString(dto.getTotalPlataA00(), "0").replace(",", "")
-                        );
-                    } catch (Exception ignore) {}
-                    String commission = df.format(totalA00 * 0.025);
-
-                    String[] commissionRow = {
+                if (Integer.parseInt(dto.getNrArticole()) > 1) {
+                    String[] additionalHsCode = {
                             String.valueOf(counter),  // nr.crt
                             "",                         // CIF/CNP
                             "",
-                            "RON",                         // deviz
-                            "COMISION PLATI AVANSATE",  // produs
-                            "",                         // Serie produs
-                            "1",                        // Cant
+                            "eur",                         // deviz
+                            "ADDITIONAL HS CODE",       // produs
+                            "nu e cazul",                         // Serie produs
+                            String.valueOf(Integer.parseInt(dto.getNrArticole()) - 1),                        // Cant
                             "BUC",                      // UM
-                            commission,                 // Pret FTVA = 2.5% × A00
-                            "19",                       // cota TVA
-                            "MRN " + dto.getMrn(),      // nota produs
+                            "5",                 // Pret FTVA = 2.5% × A00
+                            "0",                       // cota TVA
+                            "MRN " + dto.getMrn()
+                                    + " - CONTAINER" + dto.getNrContainer(),    // nota produs
                             "",                         // scutit TVA
                             ""                          // motiv scutire TVA
                     };
-                    writer.writeNext(commissionRow);
-
-                    // 4) advance‐payment row
-                    counter++;
-                    String[] advanceRow = {
-                            String.valueOf(counter),  // nr.crt
-                            "",                         // CIF/CNP
-                            "",
-                            "RON",                         // deviz
-                            "PLATI AVANSATE",           // produs
-                            "",                         // Serie produs
-                            "1",                        // Cant
-                            "BUC",                      // UM
-                            Objects.toString(dto.getTotalPlataA00(), ""), // Pret FTVA = total
-                            "0",                        // cota TVA
-                            "MRN " + dto.getMrn(),      // nota produs
-                            "",                         // scutit TVA
-                            ""                          // motiv scutire TVA
-                    };
-                    writer.writeNext(advanceRow);
+                    writer.writeNext(additionalHsCode);
                 }
 
                 counter++;

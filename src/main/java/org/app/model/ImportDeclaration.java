@@ -10,9 +10,7 @@ import lombok.Setter;
 public class ImportDeclaration {
     private String nrDestinatar;
     private String mrn;
-    private String nrDeReferinta;
-    private String valoareStatistica;
-    private String depozitPlataAnticipata;
+    private String nrArticole;
+    private String nrContainer;
     private String referintaDocument;
-    private String totalPlataA00;
 }

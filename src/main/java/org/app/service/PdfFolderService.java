@@ -63,9 +63,8 @@ public class PdfFolderService {
 
         List<ImportDeclaration> good = new ArrayList<>();
         List<String> expected = List.of(
-                "nrDestinatar","mrn","nrDeReferinta",
-                "valoareStatistica","depozitPlataAnticipata",
-                "referintaDocument","totalPlataA00"
+                "nrDestinatar","mrn","nrArticole",
+                "referintaDocument","nrContainer"
         );
 
         System.out.println(root);

@@ -5,6 +5,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ProgressIndicator?>
 
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.RadioButton?>
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.app.controller.MainController"
       spacing="10" alignment="TOP_CENTER">
@@ -12,6 +14,14 @@
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
+
+    <!-- Radio Buttons for Selection -->
+
+    <HBox spacing="10" alignment="CENTER">
+        <RadioButton fx:id="cuFizicRadio" text="CU FIZIC"/>
+        <RadioButton fx:id="faraFizicRadio" text="FARA FIZIC"/>
+    </HBox>
+
     <Button fx:id="browseButton" text="Browse Folder" onAction="#onBrowse"/>
     <TextArea fx:id="logArea" editable="false" wrapText="true" VBox.vgrow="ALWAYS"/>
     <ProgressIndicator fx:id="spinner" visible="false" />
