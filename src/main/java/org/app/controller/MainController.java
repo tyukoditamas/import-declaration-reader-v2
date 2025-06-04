@@ -105,6 +105,7 @@ public class MainController {
             writer.writeNext(new String[]{
                     "nr.crt",
                     "CIF/CNP",
+                    "den. client",
                     "deviz",
                     "Produs",
                     "Serie produs",
@@ -125,9 +126,10 @@ public class MainController {
                 String[] primary = {
                         String.valueOf(counter),                    // nr.crt
                         cif,                                        // CIF/CNP
-                        "eur",                                      // deviz
+                        "",
+                        "EUR",                                      // deviz
                         "PRIMARY CUSTOMS DECLARATION",              // produs
-                        "nu e cazul",                               // Serie produs
+                        "",                               // Serie produs
                         "1",                                        // Cant
                         "BUC",                                      // UM
                         "50",                                       // Pret FTVA logic
@@ -143,9 +145,10 @@ public class MainController {
                 String[] transit = {
                         String.valueOf(counter),      // nr.crt
                         "",                             // CIF/CNP
-                        "eur",                             // deviz
+                        "",
+                        "EUR",                             // deviz
                         "TRANSIT",                      // produs
-                        "nu e cazul",                             // Serie produs
+                        "",                             // Serie produs
                         "1",                            // Cant
                         "BUC",                          // UM
                         "75",                           // Pret FTVA
@@ -160,9 +163,10 @@ public class MainController {
                     String[] additionalHsCode = {
                             String.valueOf(counter),  // nr.crt
                             "",                         // CIF/CNP
-                            "eur",                         // deviz
+                            "",
+                            "EUR",                         // deviz
                             "ADDITIONAL HS CODE",       // produs
-                            "nu e cazul",                         // Serie produs
+                            "",                         // Serie produs
                             String.valueOf(Integer.parseInt(dto.getNrArticole()) - 1),                        // Cant
                             "BUC",                      // UM
                             "5",                 // Pret FTVA = 2.5% × A00
@@ -179,9 +183,10 @@ public class MainController {
                 String[] physicalControl = {
                         String.valueOf(counter),      // nr.crt
                         "",                             // CIF/CNP
-                        "eur",                             // deviz
+                        "",
+                        "EUR",                             // deviz
                         "PHYSICAL CONTROL",                      // produs
-                        "nu e cazul",                             // Serie produs
+                        "",                             // Serie produs
                         "0",                            // Cant
                         "BUC",                          // UM
                         "22",                           // Pret FTVA

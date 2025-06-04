@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.app</groupId>
-    <artifactId>import-declaration-reader-v2</artifactId>
+    <artifactId>import-declaration-reader-lpp</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
@@ -43,7 +43,7 @@
     </dependencies>
 
     <build>
-        <finalName>import-declaration-reader</finalName>
+        <finalName>import-declaration-reader-lpp</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -213,7 +213,7 @@
                                     <input>${project.build.directory}</input>
                                     <mainJar>${project.build.finalName}.jar</mainJar>
                                     <mainClass>org.app.Main</mainClass>
-                                    <name>import-declaration-reader</name>
+                                    <name>import-declaration-reader-lpp</name>
                                     <addModules>javafx.controls,javafx.fxml</addModules>
                                 </configuration>
                             </execution>
@@ -287,7 +287,7 @@
                                     <input>${project.build.directory}</input>
                                     <mainJar>${project.build.finalName}.jar</mainJar>
                                     <mainClass>org.app.Main</mainClass>
-                                    <name>import-declaration-reader</name>
+                                    <name>import-declaration-reader-lpp</name>
                                     <addModules>javafx.controls,javafx.fxml</addModules>
                                 </configuration>
                             </execution>
