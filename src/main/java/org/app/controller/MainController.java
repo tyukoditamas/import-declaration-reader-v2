@@ -209,6 +209,7 @@ public class MainController {
             // 1) Header
             writer.writeNext(new String[]{
                     "nr.crt",
+                    "den. client",
                     "CIF/CNP",
                     "deviz",
                     "Produs",
@@ -230,9 +231,10 @@ public class MainController {
                 String[] primary = {
                         String.valueOf(counter),                    // nr.crt
                         cif,                                        // CIF/CNP
-                        "eur",                                      // deviz
+                        "",
+                        "EUR",                                      // deviz
                         "PRIMARY CUSTOMS DECLARATION",              // produs
-                        "nu e cazul",                               // Serie produs
+                        "",                               // Serie produs
                         "1",                                        // Cant
                         "BUC",                                      // UM
                         "50",                                       // Pret FTVA logic
@@ -249,9 +251,9 @@ public class MainController {
                         String.valueOf(counter),      // nr.crt
                         "",                             // CIF/CNP
                         "",
-                        "eur",                             // deviz
+                        "EUR",                             // deviz
                         "TRANSIT",                      // produs
-                        "nu e cazul",                             // Serie produs
+                        "",                             // Serie produs
                         "1",                            // Cant
                         "BUC",                          // UM
                         "75",                           // Pret FTVA
@@ -267,9 +269,9 @@ public class MainController {
                             String.valueOf(counter),  // nr.crt
                             "",                         // CIF/CNP
                             "",
-                            "eur",                         // deviz
+                            "EUR",                         // deviz
                             "ADDITIONAL HS CODE",       // produs
-                            "nu e cazul",                         // Serie produs
+                            "",                         // Serie produs
                             String.valueOf(Integer.parseInt(dto.getNrArticole()) - 1),                        // Cant
                             "BUC",                      // UM
                             "5",                 // Pret FTVA = 2.5% × A00
