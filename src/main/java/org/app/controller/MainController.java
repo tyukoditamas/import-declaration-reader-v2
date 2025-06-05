@@ -126,7 +126,7 @@ public class MainController {
                 String[] primary = {
                         String.valueOf(counter),                    // nr.crt
                         cif,                                        // CIF/CNP
-                        "",
+                        cif,
                         "EUR",                                      // deviz
                         "PRIMARY CUSTOMS DECLARATION",              // produs
                         "",                               // Serie produs
@@ -231,7 +231,7 @@ public class MainController {
                 String[] primary = {
                         String.valueOf(counter),                    // nr.crt
                         cif,                                        // CIF/CNP
-                        "",
+                        cif,
                         "EUR",                                      // deviz
                         "PRIMARY CUSTOMS DECLARATION",              // produs
                         "",                               // Serie produs
