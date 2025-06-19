@@ -101,11 +101,11 @@ public class MainController {
 
     private void writeCsvCuFizic(File outFile, List<ImportDeclaration> list) throws IOException {
         try (CSVWriter writer = new CSVWriter(new FileWriter(outFile))) {
-            // 1) Header
+            // Header
             writer.writeNext(new String[]{
                     "nr.crt",
-                    "CIF/CNP",
                     "den. client",
+                    "CIF/CNP",
                     "deviz",
                     "Produs",
                     "Serie produs",
@@ -120,32 +120,32 @@ public class MainController {
 
             int counter = 1;
             for (ImportDeclaration dto : list) {
-                String cif = dto.getNrDestinatar();
 
-                // --- 1) primary row ---
-                String[] primary = {
-                        String.valueOf(counter),                    // nr.crt
-                        cif,                                        // CIF/CNP
-                        cif,
-                        "EUR",                                      // deviz
-                        "PRIMARY CUSTOMS DECLARATION",              // produs
-                        "",                               // Serie produs
-                        "1",                                        // Cant
-                        "BUC",                                      // UM
-                        "50",                                       // Pret FTVA logic
-                        "0",                                       // cota TVA
-                        "MRN " + dto.getMrn()
-                                + " - CONTAINER" + dto.getNrContainer(),    // nota produs
-                        "",                                         // scutit TVA
-                        ""                                          // motiv scutire TVA
-                };
-                writer.writeNext(primary);
+                String productNoteDocumentReference;
 
-                // --- 2) supplemental row ---
+                if (dto.getReferintaDocument().contains("25ROBU1030"))
+                    productNoteDocumentReference = "OTP - " + dto.getReferintaDocument() + " - " + dto.getNrContainer();
+                else if (dto.getReferintaDocument().contains("25ROCT1900"))
+                    productNoteDocumentReference = "CT - " + dto.getReferintaDocument() + " - " + dto.getNrContainer();
+                else
+                    productNoteDocumentReference = dto.getReferintaDocument() + " - " + dto.getNrContainer();
+
+                String productNotePMrn;
+
+                if (dto.getMrn().contains("25ROBU1030"))
+                    productNotePMrn = "OTP - "  + dto.getMrn() + " - " + dto.getNrContainer();
+                else if (dto.getReferintaDocument().contains("25ROCT1900"))
+                    productNotePMrn = "CT - " + dto.getMrn() + " - " + dto.getNrContainer();
+                else
+                    productNotePMrn = dto.getMrn() + " - " + dto.getNrContainer();
+
+
+
+                // --- 1) transit row ---
                 String[] transit = {
                         String.valueOf(counter),      // nr.crt
+                        "",                             // den client
                         "",                             // CIF/CNP
-                        "",
                         "EUR",                             // deviz
                         "TRANSIT",                      // produs
                         "",                             // Serie produs
@@ -153,49 +153,67 @@ public class MainController {
                         "BUC",                          // UM
                         "75",                           // Pret FTVA
                         "0",                           // cota TVA
-                        dto.getReferintaDocument(),     // nota produs
+                        productNoteDocumentReference,     // nota produs
                         "",                             // scutit TVA
                         ""                              // motiv scutire TVA
                 };
                 writer.writeNext(transit);
 
-                if (Integer.parseInt(dto.getNrArticole()) > 1) {
-                    String[] additionalHsCode = {
-                            String.valueOf(counter),  // nr.crt
-                            "",                         // CIF/CNP
-                            "",
-                            "EUR",                         // deviz
-                            "ADDITIONAL HS CODE",       // produs
-                            "",                         // Serie produs
-                            String.valueOf(Integer.parseInt(dto.getNrArticole()) - 1),                        // Cant
-                            "BUC",                      // UM
-                            "5",                 // Pret FTVA = 2.5% × A00
-                            "0",                       // cota TVA
-                            "MRN " + dto.getMrn()
-                                    + " - CONTAINER" + dto.getNrContainer(),    // nota produs
-                            "",                         // scutit TVA
-                            ""                          // motiv scutire TVA
-                    };
-                    writer.writeNext(additionalHsCode);
-                }
-
-                // --- 3) physical control
+                // --- 2) physical control
                 String[] physicalControl = {
                         String.valueOf(counter),      // nr.crt
+                        "",                             // den client
                         "",                             // CIF/CNP
-                        "",
                         "EUR",                             // deviz
                         "PHYSICAL CONTROL",                      // produs
                         "",                             // Serie produs
-                        "0",                            // Cant
+                        "4",                            // Cant
                         "BUC",                          // UM
                         "22",                           // Pret FTVA
                         "0",                           // cota TVA
-                        "CT - " + dto.getReferintaDocument(),     // nota produs
+                        productNoteDocumentReference,     // nota produs
                         "",                             // scutit TVA
                         ""                              // motiv scutire TVA
                 };
                 writer.writeNext(physicalControl);
+
+                // --- 3) PRIMARY CUSTOMS DECLARATION row ---
+                String[] primary = {
+                        String.valueOf(counter),                    // nr.crt
+                        "LPP S.A",                                        // den client
+                        "PL 5831014898",                                         //CIF/CNP
+                        "EUR",                                      // deviz
+                        "PRIMARY CUSTOMS DECLARATION",              // produs
+                        "",                                         // Serie produs
+                        "1",                                        // Cant
+                        "BUC",                                      // UM
+                        "50",                                       // Pret FTVA logic
+                        "0",                                       // cota TVA
+                        productNotePMrn,                  // nota produs
+                        "",                                         // scutit TVA
+                        ""                                          // motiv scutire TVA
+                };
+                writer.writeNext(primary);
+
+                // --- 4) ADDITIONAL hs row ---
+                if (Integer.parseInt(dto.getNrArticole()) > 1) {
+                    String[] additionalHsCode = {
+                            String.valueOf(counter),  // nr.crt
+                            "",                             // den client
+                            "",                             // CIF/CNP
+                            "EUR",                         // deviz
+                            "ADDITIONAL HS CODE",          // produs
+                            "",                            // Serie produs
+                            String.valueOf(Integer.parseInt(dto.getNrArticole()) - 1),                        // Cant
+                            "BUC",                        // UM
+                            "5",                           // Pret FTVA = 2.5% × A00
+                            "0",                             // cota TVA
+                            productNotePMrn,                 // nota produs
+                            "",                            // scutit TVA
+                            ""                             // motiv scutire TVA
+                    };
+                    writer.writeNext(additionalHsCode);
+                }
 
                 counter++;
             }
@@ -225,28 +243,26 @@ public class MainController {
 
             int counter = 1;
             for (ImportDeclaration dto : list) {
-                String cif = dto.getNrDestinatar();
+                String productNoteDocumentReference;
 
-                // --- 1) primary row ---
-                String[] primary = {
-                        String.valueOf(counter),                    // nr.crt
-                        cif,                                        // CIF/CNP
-                        cif,
-                        "EUR",                                      // deviz
-                        "PRIMARY CUSTOMS DECLARATION",              // produs
-                        "",                               // Serie produs
-                        "1",                                        // Cant
-                        "BUC",                                      // UM
-                        "50",                                       // Pret FTVA logic
-                        "0",                                       // cota TVA
-                        "MRN " + dto.getMrn()
-                                + " - CONTAINER" + dto.getNrContainer(),    // nota produs
-                        "",                                         // scutit TVA
-                        ""                                          // motiv scutire TVA
-                };
-                writer.writeNext(primary);
+                if (dto.getReferintaDocument().contains("25ROBU1030"))
+                    productNoteDocumentReference = "OTP - " + dto.getReferintaDocument() + " - " + dto.getNrContainer();
+                else if (dto.getReferintaDocument().contains("25ROCT1900"))
+                    productNoteDocumentReference = "CT - " + dto.getReferintaDocument() + " - " + dto.getNrContainer();
+                else
+                    productNoteDocumentReference = dto.getReferintaDocument() + " - " + dto.getNrContainer();
 
-                // --- 2) supplemental row ---
+                String productNotePMrn;
+
+                if (dto.getMrn().contains("25ROBU1030"))
+                    productNotePMrn = "OTP - "  + dto.getMrn() + " - " + dto.getNrContainer();
+                else if (dto.getReferintaDocument().contains("25ROCT1900"))
+                    productNotePMrn = "CT - " + dto.getMrn() + " - " + dto.getNrContainer();
+                else
+                    productNotePMrn = dto.getMrn() + " - " + dto.getNrContainer();
+
+
+                // --- 1) transit row ---
                 String[] transit = {
                         String.valueOf(counter),      // nr.crt
                         "",                             // CIF/CNP
@@ -258,12 +274,33 @@ public class MainController {
                         "BUC",                          // UM
                         "75",                           // Pret FTVA
                         "0",                           // cota TVA
-                        dto.getReferintaDocument(),     // nota produs
+                        productNoteDocumentReference,             // nota produs
                         "",                             // scutit TVA
                         ""                              // motiv scutire TVA
                 };
                 writer.writeNext(transit);
 
+
+                // --- 2) PRIMARY CUSTOMS DECLARATION ---
+                String[] primary = {
+                        String.valueOf(counter),                    // nr.crt
+                        "LPP S.A",                                        // den client
+                        "PL 5831014898",                                        // CIF/CNP
+                        "EUR",                                      // deviz
+                        "PRIMARY CUSTOMS DECLARATION",              // produs
+                        "",                               // Serie produs
+                        "1",                                        // Cant
+                        "BUC",                                      // UM
+                        "50",                                       // Pret FTVA logic
+                        "0",                                       // cota TVA
+                        productNotePMrn,                         // nota produs
+                        "",                                         // scutit TVA
+                        ""                                          // motiv scutire TVA
+                };
+                writer.writeNext(primary);
+
+
+                // --- 3) ADDITIONAL HS CODE ---
                 if (Integer.parseInt(dto.getNrArticole()) > 1) {
                     String[] additionalHsCode = {
                             String.valueOf(counter),  // nr.crt
@@ -276,8 +313,7 @@ public class MainController {
                             "BUC",                      // UM
                             "5",                 // Pret FTVA = 2.5% × A00
                             "0",                       // cota TVA
-                            "MRN " + dto.getMrn()
-                                    + " - CONTAINER" + dto.getNrContainer(),    // nota produs
+                            productNotePMrn,    // nota produs
                             "",                         // scutit TVA
                             ""                          // motiv scutire TVA
                     };
