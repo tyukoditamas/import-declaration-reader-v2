@@ -17,9 +17,7 @@ import org.app.service.PdfFolderService;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.List;
-import java.util.Objects;
 
 public class MainController {
     @FXML
@@ -104,8 +102,8 @@ public class MainController {
             // Header
             writer.writeNext(new String[]{
                     "nr.crt",
-                    "den. client",
                     "CIF/CNP",
+                    "den. client",
                     "deviz",
                     "Produs",
                     "Serie produs",
@@ -144,8 +142,8 @@ public class MainController {
                 // --- 1) transit row ---
                 String[] transit = {
                         String.valueOf(counter),      // nr.crt
-                        "",                             // den client
-                        "",                             // CIF/CNP
+                        "PL 5831014898",                   // CIF/CNP
+                        "LPP S.A",               // den client
                         "EUR",                             // deviz
                         "TRANSIT",                      // produs
                         "",                             // Serie produs
@@ -162,8 +160,8 @@ public class MainController {
                 // --- 2) physical control
                 String[] physicalControl = {
                         String.valueOf(counter),      // nr.crt
-                        "",                             // den client
                         "",                             // CIF/CNP
+                        "",                             // den client
                         "EUR",                             // deviz
                         "PHYSICAL CONTROL",                      // produs
                         "",                             // Serie produs
@@ -180,8 +178,8 @@ public class MainController {
                 // --- 3) PRIMARY CUSTOMS DECLARATION row ---
                 String[] primary = {
                         String.valueOf(counter),                    // nr.crt
-                        "LPP S.A",                                        // den client
-                        "PL 5831014898",                                         //CIF/CNP
+                        "",                                        //CIF/CNP
+                        "",                                         // den client
                         "EUR",                                      // deviz
                         "PRIMARY CUSTOMS DECLARATION",              // produs
                         "",                                         // Serie produs
@@ -199,8 +197,8 @@ public class MainController {
                 if (Integer.parseInt(dto.getNrArticole()) > 1) {
                     String[] additionalHsCode = {
                             String.valueOf(counter),  // nr.crt
-                            "",                             // den client
                             "",                             // CIF/CNP
+                            "",                             // den client
                             "EUR",                         // deviz
                             "ADDITIONAL HS CODE",          // produs
                             "",                            // Serie produs
@@ -227,8 +225,8 @@ public class MainController {
             // 1) Header
             writer.writeNext(new String[]{
                     "nr.crt",
-                    "den. client",
                     "CIF/CNP",
+                    "den. client",
                     "deviz",
                     "Produs",
                     "Serie produs",
@@ -265,8 +263,8 @@ public class MainController {
                 // --- 1) transit row ---
                 String[] transit = {
                         String.valueOf(counter),      // nr.crt
-                        "",                             // CIF/CNP
-                        "",
+                        "PL 5831014898",                // CIF/CNP
+                        "LPP S.A",                      // den client
                         "EUR",                             // deviz
                         "TRANSIT",                      // produs
                         "",                             // Serie produs
@@ -284,8 +282,8 @@ public class MainController {
                 // --- 2) PRIMARY CUSTOMS DECLARATION ---
                 String[] primary = {
                         String.valueOf(counter),                    // nr.crt
-                        "LPP S.A",                                        // den client
-                        "PL 5831014898",                                        // CIF/CNP
+                        "",                                        // CIF/CNP
+                        "",                                        // den client
                         "EUR",                                      // deviz
                         "PRIMARY CUSTOMS DECLARATION",              // produs
                         "",                               // Serie produs
@@ -305,7 +303,7 @@ public class MainController {
                     String[] additionalHsCode = {
                             String.valueOf(counter),  // nr.crt
                             "",                         // CIF/CNP
-                            "",
+                            "",                         // den client
                             "EUR",                         // deviz
                             "ADDITIONAL HS CODE",       // produs
                             "",                         // Serie produs
