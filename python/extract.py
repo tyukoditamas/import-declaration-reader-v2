@@ -33,14 +33,18 @@ def extract_fields(text):
 
     # 3. referintaDocument
     for l in lines:
-        # look for N821 anywhere on the line
-        if "N821" in l:
-            # split on the slash, max 1 split
+        # Match any line with N822 or N821
+        if "N822" in l or "N821" in l:
+            # Option A: simple split+strip
             parts = l.split("/", 1)
             if len(parts) > 1:
-                # parts[1] == " 25ROCT1900E52392J7"
                 data["referintaDocument"] = parts[1].strip().split()[0]
-            break
+            else:
+                # Fallback: regex for either N822 or N821
+                m = re.search(r"N82[12]\s*/\s*(\S+)", l)
+                if m:
+                    data["referintaDocument"] = m.group(1)
+            break  # stop after first match
 
     # 4. nrArticole: section header “5 Articole” → next line only
     for l in lines:

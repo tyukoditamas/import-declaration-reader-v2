@@ -14,8 +14,10 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class PdfFolderService {
@@ -61,13 +63,12 @@ public class PdfFolderService {
             throw new RuntimeException("Unexpected extractor output (not a JSON array):\n" + json);
         }
 
-        List<ImportDeclaration> good = new ArrayList<>();
         List<String> expected = List.of(
                 "nrDestinatar","mrn","nrArticole",
                 "referintaDocument","nrContainer"
         );
 
-        System.out.println(root);
+        List<Map.Entry<String, ImportDeclaration>> rows = new ArrayList<>();
 
         ArrayNode arr = (ArrayNode) root;
         for (JsonNode n : arr) {
@@ -94,11 +95,48 @@ public class PdfFolderService {
 
             // otherwise bind and record it
             ImportDeclaration dto = mapper.treeToValue(n, ImportDeclaration.class);
-            logger.accept("✅ Parsed successfully: " + fileName);
-            good.add(dto);
+            rows.add(new AbstractMap.SimpleEntry<>(fileName, dto));
         }
 
+        rows.sort((a, b) -> naturalCompareIgnoreCase(a.getKey(), b.getKey()));
+
+        List<ImportDeclaration> good = new ArrayList<>(rows.size());
+        for (var e : rows) {
+            logger.accept("✅ Parsed successfully: " + e.getKey());
+            good.add(e.getValue());
+        }
         logger.accept("Total PDFs parsed: " + good.size());
         return good;
+    }
+
+    private static int naturalCompareIgnoreCase(String a, String b) {
+        int ia = 0, ib = 0, na = a.length(), nb = b.length();
+        while (ia < na && ib < nb) {
+            char ca = Character.toLowerCase(a.charAt(ia));
+            char cb = Character.toLowerCase(b.charAt(ib));
+
+            // if both chunks are digits, compare as integers
+            if (Character.isDigit(ca) && Character.isDigit(cb)) {
+                int ja = ia; while (ja < na && Character.isDigit(a.charAt(ja))) ja++;
+                int jb = ib; while (jb < nb && Character.isDigit(b.charAt(jb))) jb++;
+                String da = a.substring(ia, ja);
+                String db = b.substring(ib, jb);
+
+                // strip leading zeros for fair numeric compare
+                String da2 = da.replaceFirst("^0+(?!$)", "");
+                String db2 = db.replaceFirst("^0+(?!$)", "");
+                int cmp = Integer.compare(da2.length(), db2.length());
+                if (cmp == 0) cmp = da2.compareTo(db2);
+                if (cmp != 0) return cmp;
+
+                ia = ja; ib = jb; // numbers equal → move on
+                continue;
+            }
+
+            // otherwise compare chars (case-insensitive)
+            if (ca != cb) return ca - cb;
+            ia++; ib++;
+        }
+        return (na - ia) - (nb - ib);
     }
 }
