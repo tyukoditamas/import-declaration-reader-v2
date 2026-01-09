@@ -121,18 +121,18 @@ public class MainController {
 
                 String productNoteDocumentReference;
 
-                if (dto.getReferintaDocument().contains("25ROBU1030"))
+                if (dto.getReferintaDocument().contains("26ROBU1030"))
                     productNoteDocumentReference = "OTP - " + dto.getReferintaDocument() + " - " + dto.getNrContainer();
-                else if (dto.getReferintaDocument().contains("25ROCT1900"))
+                else if (dto.getReferintaDocument().contains("26ROCT1900"))
                     productNoteDocumentReference = "CT - " + dto.getReferintaDocument() + " - " + dto.getNrContainer();
                 else
                     productNoteDocumentReference = dto.getReferintaDocument() + " - " + dto.getNrContainer();
 
                 String productNotePMrn;
 
-                if (dto.getMrn().contains("25ROBU1030"))
+                if (dto.getMrn().contains("26ROBU1030"))
                     productNotePMrn = "OTP - "  + dto.getMrn() + " - " + dto.getNrContainer();
-                else if (dto.getReferintaDocument().contains("25ROCT1900"))
+                else if (dto.getReferintaDocument().contains("26ROCT1900"))
                     productNotePMrn = "CT - " + dto.getMrn() + " - " + dto.getNrContainer();
                 else
                     productNotePMrn = dto.getMrn() + " - " + dto.getNrContainer();
@@ -243,18 +243,18 @@ public class MainController {
             for (ImportDeclaration dto : list) {
                 String productNoteDocumentReference;
 
-                if (dto.getReferintaDocument().contains("25ROBU1030"))
+                if (dto.getReferintaDocument().contains("26ROBU1030"))
                     productNoteDocumentReference = "OTP - " + dto.getReferintaDocument() + " - " + dto.getNrContainer();
-                else if (dto.getReferintaDocument().contains("25ROCT1900"))
+                else if (dto.getReferintaDocument().contains("26ROCT1900"))
                     productNoteDocumentReference = "CT - " + dto.getReferintaDocument() + " - " + dto.getNrContainer();
                 else
                     productNoteDocumentReference = dto.getReferintaDocument() + " - " + dto.getNrContainer();
 
                 String productNotePMrn;
 
-                if (dto.getMrn().contains("25ROBU1030"))
+                if (dto.getMrn().contains("26ROBU1030"))
                     productNotePMrn = "OTP - "  + dto.getMrn() + " - " + dto.getNrContainer();
-                else if (dto.getReferintaDocument().contains("25ROCT1900"))
+                else if (dto.getReferintaDocument().contains("26ROCT1900"))
                     productNotePMrn = "CT - " + dto.getMrn() + " - " + dto.getNrContainer();
                 else
                     productNotePMrn = dto.getMrn() + " - " + dto.getNrContainer();
